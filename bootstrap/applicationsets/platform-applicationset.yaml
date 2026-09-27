@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-applications
+  namespace: argocd
+
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+
+  generators:
+    - git:
+        repoURL: https://github.com/santoshdandi/gitops.git
+        revision: main
+        directories:
+          - path: platform/*/*
+
+  template:
+    metadata:
+      name: '{{ index .path.segments 1 }}-{{ index .path.segments 2 }}'
+
+    spec:
+      project: default
+
+      source:
+        repoURL: https://github.com/santoshdandi/gitops.git
+        targetRevision: main
+        path: '{{ .path.path }}'
+
+      destination:
+        server: https://kubernetes.default.svc
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
