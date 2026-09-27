@@ -1,0 +1,39 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: git-clone
+  namespace: cicd
+
+spec:
+  params:
+    - name: repo-url
+      type: string
+      description: Git repository URL
+
+    - name: revision
+      type: string
+      default: main
+      description: Git branch, tag, or commit
+
+  workspaces:
+    - name: source
+      description: Workspace where the source code will be cloned
+
+  results:
+    - name: commit
+      description: Commit SHA that was checked out
+
+  steps:
+    - name: clone
+      image: alpine/git:2.54.0
+      script: |
+        #!/bin/sh
+        set -eu
+
+        cd "$(workspaces.source.path)"
+
+        git init
+        git remote add origin "$(params.repo-url)"
+        git fetch --depth 1 origin "$(params.revision)"
+        git checkout FETCH_HEAD
+        git rev-parse HEAD | tr -d '\n' > "$(results.commit.path)"
