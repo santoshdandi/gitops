@@ -14,11 +14,11 @@ spec:
         repoURL: https://github.com/santoshdandi/gitops.git
         revision: main
         directories:
-          - path: platform/*/*
+          - path: platform/*
 
   template:
     metadata:
-      name: '{{ index .path.segments 1 }}-{{ index .path.segments 2 }}'
+      name: '{{ .path.basename }}'
 
     spec:
       project: default
@@ -27,6 +27,8 @@ spec:
         repoURL: https://github.com/santoshdandi/gitops.git
         targetRevision: main
         path: '{{ .path.path }}'
+        directory:
+          recurse: true
 
       destination:
         server: https://kubernetes.default.svc
