@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/santoshdandi/gitops.git   # <-- change
     targetRevision: main
-    path: argocd/apps
+    path: SOC/apps
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
