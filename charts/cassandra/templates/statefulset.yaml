@@ -70,7 +70,8 @@ spec:
               command:
                 - /bin/bash
                 - -c
-                - nodetool info | grep -q "Native Transport active: true"
+                - |
+                  nodetool info | grep -q 'Native Transport active: true'
             periodSeconds: 15
             timeoutSeconds: 10
           livenessProbe:
