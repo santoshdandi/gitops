@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cassandra.fullname" . }}-headless
+  labels:
+    {{- include "cassandra.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  # Seeds must resolve before the pods are Ready, otherwise the ring can't form
+  publishNotReadyAddresses: true
+  selector:
+    {{- include "cassandra.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: intra
+      port: 7000
+    - name: cql
+      port: 9042

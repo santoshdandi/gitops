@@ -1,0 +1,6 @@
+apiVersion: v2
+name: thehive
+description: TheHive 5 security incident response platform (Cassandra backend)
+type: application
+version: 0.1.0
+appVersion: "5.4.7-1"

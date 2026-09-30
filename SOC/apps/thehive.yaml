@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: thehive
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"      # after cassandra
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/santoshdandi/gitops.git   # <-- change
+    targetRevision: main
+    path: charts/thehive
+    helm:
+      releaseName: thehive
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: thehive
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

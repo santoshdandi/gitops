@@ -1,0 +1,66 @@
+fullnameOverride: thehive
+
+image:
+  repository: strangebee/thehive
+  # Pin an explicit version (never "latest"). Check Docker Hub for the newest
+  # 5.x tag before the first deploy - upgrading later needs a data migration.
+  tag: "5.4.7-1"
+  pullPolicy: IfNotPresent
+
+# Keep at 1 while using the Lucene index and local file storage (both live on
+# a ReadWriteOnce disk). For HA switch to Elasticsearch + S3/GCS storage.
+replicaCount: 1
+
+# Secret holding play.http.secret.key. Created OUTSIDE git (see README):
+#   kubectl -n thehive create secret generic thehive-secret \
+#     --from-literal=secret-key="$(openssl rand -hex 32)"
+existingSecret:
+  name: thehive-secret
+  key: secret-key
+
+jvmOpts: "-Xms2g -Xmx2g"
+
+cassandra:
+  host: cassandra                # Service from the cassandra chart (same namespace)
+  port: 9042
+  keyspace: thehive
+  clusterName: thp
+  localDatacenter: datacenter1   # must match cassandra values: datacenter
+  replicationFactor: 1           # set to 3 when Cassandra runs 3 replicas
+
+index:
+  backend: lucene                # lucene | elasticsearch
+  luceneDirectory: /data/index
+  elasticsearch:
+    hosts: ["http://elasticsearch:9200"]
+    indexName: thehive
+
+fileStorage:
+  location: /data/files
+
+persistence:
+  storageClass: standard-rwo
+  size: 20Gi
+
+resources:
+  requests:
+    cpu: "1"
+    memory: 3Gi
+  limits:
+    memory: 3Gi
+
+service:
+  type: ClusterIP
+  port: 9000
+
+ingress:
+  enabled: false
+  className: ""                  # e.g. "gce" (external) or "gce-internal"
+  annotations: {}
+  host: thehive.example.com
+  tls: []
+  #  - secretName: thehive-tls
+  #    hosts: [thehive.example.com]
+
+nodeSelector: {}
+tolerations: []

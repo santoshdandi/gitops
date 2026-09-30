@@ -1,0 +1,30 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "cassandra.fullname" . }}
+  labels:
+    {{- include "cassandra.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "cassandra.selectorLabels" . | nindent 6 }}
+  policyTypes: ["Ingress"]
+  ingress:
+    # Clients (TheHive) -> CQL
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.clientPodLabels | nindent 14 }}
+      ports:
+        - port: 9042
+    # Cassandra node <-> node gossip, CQL and JMX (nodetool)
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "cassandra.selectorLabels" . | nindent 14 }}
+      ports:
+        - port: 7000
+        - port: 9042
+        - port: 7199
+{{- end }}

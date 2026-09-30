@@ -1,0 +1,44 @@
+# Resource names become "cassandra" and "cassandra-headless"
+fullnameOverride: cassandra
+
+image:
+  repository: cassandra          # official Docker Hub image
+  tag: "4.1"                     # TheHive 5 supports Cassandra 4.x
+  pullPolicy: IfNotPresent
+
+# 1 is fine for dev/test. Use 3 for production and set
+# thehive.cassandra.replicationFactor to 3 in the TheHive chart.
+replicaCount: 1
+
+clusterName: thp
+datacenter: datacenter1          # must match thehive values: cassandra.localDatacenter
+rack: rack1
+
+heap:
+  max: 2G
+  newSize: 400M
+
+resources:
+  requests:
+    cpu: "1"
+    memory: 4Gi
+  limits:
+    memory: 4Gi
+
+persistence:
+  storageClass: standard-rwo     # GKE balanced persistent disk
+  size: 20Gi
+
+# Only pods matching these labels may reach CQL port 9042.
+# Enforced only if GKE Dataplane V2 / network policy is enabled on the cluster.
+networkPolicy:
+  enabled: true
+  clientPodLabels:
+    app.kubernetes.io/name: thehive
+
+pdb:
+  enabled: true
+  maxUnavailable: 1
+
+nodeSelector: {}
+tolerations: []

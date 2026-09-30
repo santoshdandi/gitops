@@ -1,0 +1,20 @@
+# Apply once:  kubectl apply -n argocd -f argocd/root-app.yaml
+# It then manages everything in argocd/apps (app-of-apps pattern).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: thehive-stack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/santoshdandi/gitops.git   # <-- change
+    targetRevision: main
+    path: argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
