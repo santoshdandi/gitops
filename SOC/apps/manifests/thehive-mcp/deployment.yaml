@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thehive-mcp
+  labels:
+    app.kubernetes.io/name: thehive-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: thehive-mcp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: thehive-mcp
+    spec:
+      containers:
+        - name: thehive-mcp
+          image: ghcr.io/strangebeecorp/thehivemcp/thehivemcp:latest   # pin a version once it works
+          env:
+            - name: THEHIVE_URL
+              value: "http://thehive:9000"
+            - name: THEHIVE_ORGANISATION
+              value: "SOC"
+            - name: THEHIVE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: thehive-mcp-secret
+                  key: api-key
+            - name: MCP_BIND_HOST
+              value: "0.0.0.0"
+            - name: MCP_PORT
+              value: "8082"
+            - name: LOG_LEVEL
+              value: "INFO"
+          ports:
+            - name: mcp
+              containerPort: 8082
+          readinessProbe:
+            tcpSocket:
+              port: mcp
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: mcp
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
